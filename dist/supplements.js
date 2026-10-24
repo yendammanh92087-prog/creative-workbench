@@ -1,15 +1,16 @@
 /* 产品试用模板；知识真源留在 Obsidian。此文件不执行 AI 判断。 */
-const supplementVersion='2026-10-24';
+const supplementVersion='2026-10-25';
 const refs={
  deep:{name:'引导问答深挖法',path:'账号底座/references/引导问答深挖法.md',part:'适用范围、§一、§二、§四',scope:'抽象人设／价值判断；缺事实先追问，不替本人编造。不是所有选题的准入门槛。',source:'本轮回读执行文件；融新经验整理，不冒称课程原表',adopt:'原账号已进执行文件；通用产品适配待试用',test:'文件有猎头系列3应用记录；本产品未验证效果'},
  edit:{name:'文案线工作法',path:'账号底座/references/文案线工作法.md',part:'§4第4条、§6.1、§11.1',scope:'删减先看上下文；录制回看须核对事实与原音。账号经验不能直接当普适阈值。',source:'本轮回读正文',adopt:'原账号执行口径；产品模板是 North 整理',test:'有第1期误删纠错记录；不等于所有形式验证通过'},
  frame:{name:'画面方法说明：叙事—观点—情绪',path:'工作区/拆解/拆解包/画面方法说明_叙事观点情绪_1004.md',part:'§〇、总判断器、事件／观点／情绪表',scope:'334用于 Vlog 写作及画面组织，不机械套时长比例，不套进口播；本次按融新确认口径执行。',source:'库内课件整理；本轮未重新逐张核原图',adopt:'融新本轮明确 Vlog 可用；不改写历史文件',test:'本产品尚无成片级验证'},
  xue:{name:'薛辉方法卡候选',path:'工作区/拆解/拆解包/薛辉_网盘盘点_1006/03_薛辉方法卡候选.md',part:'M2–M5、M17、M25',scope:'内容方向、观看价值和自检提示；不把教材核清当成效果验证。',source:'库内已核教材卡；本次沿用此前回读',adopt:'候选方法；不自动提升为通用硬规则',test:'本产品未实测'},
- mu:{name:'木子双身份',path:'工作区/拆解/拆解包/木子_方法证据_1006/02_木子方法卡.md',part:'卡8；D1 3:48:28–3:48:48',scope:'社会身份与商业身份挖掘人设；不以单一流量现象自动推断身份问题。',source:'此前回读转写与核验记录',adopt:'定位目录已获融新确认',test:'账号应用记录不等于普适因果证据'},
- zhou:{name:'周百见线收口核验报告',path:'工作区/拆解/拆解包/周百见_收口核验_1007/周百见线收口核验报告_20261007.md',part:'§2.1–2.4',scope:'商业目标明确时，先商业、再内容、后人设；不是强迫全部用户变现。',source:'库内报告；原始咨询逐字稿权限受限，未重听原声',adopt:'用于有商业目标的追问参考',test:'本产品未验证；咨询表原件未取得'},
- li:{name:'Don课程·嘉宾李老师',path:'工作区/拆解/拆解包/don课_广州26.06/提炼笔记/day2_part2.md',part:'讲者说明；day2_5 43:00起',scope:'Don负责内容层，李讲短视频技巧；具体定位讲解注明嘉宾，不署作 Don 本人原话。',source:'此前回读讲者说明与机器转写',adopt:'按融新确认分工引用',test:'未完成全课程逐条署名审计'}
+ mu:{name:'木子双身份',path:'工作区/拆解/拆解包/木子_方法证据_1006/02_木子方法卡.md',part:'卡8；D1 3:48:28–3:48:48（仅引用双身份定义）',scope:'社会身份与商业身份挖掘人设；不以单一流量现象自动推断身份问题。',source:'此前回读转写与核验记录',adopt:'定位目录已获融新确认',test:'账号应用记录不等于普适因果证据'},
+ zhou:{name:'周百见线收口核验报告',path:'工作区/拆解/拆解包/周百见_收口核验_1007/周百见线收口核验报告_20261007.md',part:'§2.1–2.4',scope:'商业目标明确时，先商业、再内容、后人设；不是强迫全部用户变现。',source:'库内报告；原始咨询逐字稿权限受限，未重听原声',adopt:'用于有商业目标的追问参考',test:'本产品未验证；已填写样例已入库，空白模板原件未取得'},
+ liPersona:{name:'Don课程·李老师的人设表达',path:'工作区/拆解/拆解包/don课_广州26.06/提炼笔记/day1_part3.md',part:'day1_9 23:03–23:55；人设与超级符号',scope:'反复呈现具体细节形成记忆点；不是真实性审核规则。讲者为嘉宾老李。',source:'回读提炼笔记与机器转写；未重听原声',adopt:'用于人设表达参考',test:'本产品未验证'},
+ li:{name:'Don课程·嘉宾李老师',path:'工作区/拆解/拆解包/don课_广州26.06/提炼笔记/day2_part2.md',part:'讲者说明；day2_5 43:00–43:25（用户、形式、风格与价值定位）',scope:'Don负责内容层，李讲短视频技巧；具体定位讲解注明嘉宾，不署作 Don 本人原话。',source:'此前回读讲者说明与机器转写',adopt:'按融新确认分工引用',test:'未完成全课程逐条署名审计'}
 };
-const refRoutes={position:['mu','zhou','xue','li'],topic:['deep','xue'],writing:['deep','edit','frame','xue'],shoot:['frame','edit'],review:['edit','frame']};
+const refRoutes={position:['mu','zhou','xue','liPersona','li'],topic:['deep','xue'],writing:['deep','edit','frame','xue'],shoot:['frame','edit'],review:['edit','frame']};
 const spec={
  vlog:{title:'配音 Vlog 分镜表',cols:['文案锚点','主要作用：事件／情绪／观点','画面动作或对象','景别／视角','已有素材及出处','补拍／示意说明','预计时长或剪切依据'],why:'锚点避免画面跑题；作用决定拍什么；景别与视角服务表达；素材出处区分真实记录与示意；时长是计划，不是统一硬阈值。',sample:['给猫洗澡花了120元','事件','真实洗护过程或账单，隐私打码','手部近景／平视','需由创作者确认是否存在','没有现场素材不虚构；可本人讲述','依原声和动作完整性决定']},
  spoken:{title:'口播拍摄清单',cols:['段落／台词锚点','不可改的事实或原话','机位／构图','收音与环境','是否需要补充素材','Take／待核问题'],why:'台词锚点便于回看；事实项保护数字与身份；机位和收音为制作准备；补充素材按需，不要求每句话插画面；Take记录保留选择依据。',sample:['开头：120元与39元的对比','金额须按本人确认及实拍口播核对','人物稳定构图，文字预留空间','先试听一小段，确认人声清楚','不强制；有真实账单可候选','未拍摄／待核']},
@@ -29,13 +30,13 @@ if(page==='writing'){html+=`<details class="panel"><summary>当前形式的使�
 if(page==='shoot'){if(state.form!=='访谈（待补专属规则）')html+=editableTable(state.form==='口播'?'spoken':'vlog');html+=`<details class="panel"><summary>模板来源说明</summary><p>分镜字段参考《画面方法说明》的文案与画面对位、景别视角、已有素材／补拍逻辑。口播表是 North 依据制作需求和《文案线工作法》§6.1录制回看整理的执行模板，不冒称老师原表。</p><p>库内有小剧场逐镜方案，但与通用实拍不同。本版先给可填写模板与明确标识的示例，等待真实拍摄验证。</p></details>`}
 if(page==='review')html+=editableTable('filmCheck')+passagePanel()+`<details class="panel"><summary>自动检查与人工判断的边界</summary><div class="row">本版已实现：本地视频播放、插入当前时间、记录与导出；不分析视频内容。</div><div class="row">可开发的确定性检查（未实现）：字幕时间范围、重叠、空白、越界。需要可读取的字幕和媒体元数据。</div><div class="row">模型辅助、人工复核（未实现）：转写差异、字幕同步、噪音、可能遮脸等，不能直接当作最终结论。</div><div class="row">人工决定：段落删留、气口舒适度、情绪作用、人物表达、最终事实核准。</div><p class="small">无需发布数据即可审内容；数据归因另需真实发布数据，本版未加入。</p></details>`;
 if(refRoutes[page])html+=sourcesPanel(refRoutes[page]);
-if(page==='gaps'){app.innerHTML=hero('补件状态 / '+supplementVersion,'已补什么，还缺什么','本轮补产品模板与证据边界；不改视觉风格，不修改 Obsidian。')+`<section class="panel"><div class="row"><h3>已落地</h3><p>五入口来源指路及三态说明；选题追问边界；口播与Vlog分流；两张拍摄模板；两张修改复查表；段落作用案例与自动化能力边界。表格支持增加、保存和导出。</p></div><div class="row"><h3>仍需小拆核补</h3><p>真实成片的段落保留／删减对照证据；拍摄模板应用样本；“删前三问”极性歧义；周百见咨询表原件；访谈独立结构。只补依据与案例，不重做目录。</p></div><div class="row"><h3>North 技术待实现</h3><p>AI生成与分析、实时Obsidian检索、自动审片、跨设备同步、安装方案。模板可用不等于这些能力已接入。</p></div><div class="row"><h3>待用户验收</h3><p>试用模板是否顺手、是否需要字段调整；风格尚未选择，本轮未改。</p></div><button id="suppExport">导出补缺状态与依据</button></section>`;}
+if(page==='gaps'){app.innerHTML=hero('补件状态 / '+supplementVersion,'已补什么，还缺什么','本轮补产品模板与证据边界；不改视觉风格，不修改 Obsidian。')+`<section class="panel"><div class="row"><h3>已落地</h3><p>五入口来源指路及三态说明；选题追问边界；口播与Vlog分流；两张拍摄模板；两张修改复查表；段落作用案例与自动化能力边界。表格支持增加、保存和导出。</p></div><div class="row"><h3>仍需小拆核补</h3><p>真实成片的段落保留／删减对照证据；拍摄模板应用样本；“删前三问”极性歧义；周百见咨询表的空白模板原件（已填写样例已入库，不再作为缺件）；访谈独立结构。只补依据与案例，不重做目录。</p></div><div class="row"><h3>North 技术待实现</h3><p>AI生成与分析、实时Obsidian检索、自动审片、跨设备同步、安装方案。模板可用不等于这些能力已接入。</p></div><div class="row"><h3>待用户验收</h3><p>试用模板是否顺手、是否需要字段调整；风格尚未选择，本轮未改。</p></div><button id="suppExport">导出补缺状态与依据</button></section>`;}
 app.insertAdjacentHTML('beforeend',html);
 document.querySelectorAll('[data-table]').forEach(e=>e.oninput=()=>{rows[e.dataset.table][+e.dataset.row][+e.dataset.col]=e.value;tableSave()});
 document.querySelectorAll('[data-add]').forEach(e=>e.onclick=()=>{rows[e.dataset.add].push(spec[e.dataset.add].cols.map(()=>''));tableSave();render()});
 document.querySelectorAll('[data-sample]').forEach(e=>e.onclick=()=>{rows[e.dataset.sample].push([...spec[e.dataset.sample].sample]);tableSave();render()});
 document.querySelectorAll('[data-table-export]').forEach(e=>e.onclick=()=>download(spec[e.dataset.tableExport].title+'.md',tableText(e.dataset.tableExport)));
-if($('#suppExport'))$('#suppExport').onclick=()=>download('工作台补缺状态_1024.md',app.innerText+'\n\n'+Object.values(refs).map(r=>r.name+'\n'+r.path+' '+r.part+'\n'+r.scope+'\n来源：'+r.source+'\n采用：'+r.adopt+'\n验证：'+r.test).join('\n\n'));
+if($('#suppExport'))$('#suppExport').onclick=()=>download('工作台补缺状态_1025.md',app.innerText+'\n\n'+Object.values(refs).map(r=>r.name+'\n'+r.path+' '+r.part+'\n'+r.scope+'\n来源：'+r.source+'\n采用：'+r.adopt+'\n验证：'+r.test).join('\n\n'));
 };
 const originalRecord=record;record=function(){return originalRecord()+'\n\n'+Object.keys(spec).map(k=>tableText(k)).join('\n\n')};
 const css=document.createElement('style');css.textContent='.table-scroll{overflow-x:auto}.work-table{border-collapse:collapse;width:100%;min-width:860px}.work-table th,.work-table td{padding:8px;text-align:left;border:1px solid var(--line);vertical-align:top}.work-table th{font-size:12px;background:var(--light)}.work-table textarea{min-width:110px;min-height:110px;font-size:13px;padding:8px}';document.head.appendChild(css);render();
