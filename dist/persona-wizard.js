@@ -1,0 +1,19 @@
+(()=>{
+let stage='connect',introPage=0;
+const css=document.createElement('style');css.textContent='#persona-body [hidden]{display:none!important}';document.head.append(css);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function mount(){const body=document.getElementById('persona-body');if(!body||!document.getElementById('persona-guide'))return;
+let host=document.getElementById('guided-flow');if(!host){host=document.createElement('section');host.id='guided-flow';body.prepend(host)}
+const guide=document.getElementById('persona-guide'),bio=document.getElementById('persona-introduction'),service=document.getElementById('persona-service');
+if(!window.workbenchAI.isReady())stage='connect';
+body.querySelectorAll(':scope > *').forEach(x=>x.hidden=true);host.hidden=false;
+document.querySelectorAll('#persona-module > .actions').forEach(x=>x.hidden=true);
+if(stage==='connect'){host.innerHTML='<h3>第一步 · 先连接你的 AI</h3><p>连接成功后，再一页一题填写。不需要现在准备长篇材料。</p><button id="flow-connect" class="primary">连接我的 AI</button><button id="flow-start" '+(window.workbenchAI.isReady()?'':'disabled')+'>连接成功，开始填写</button><p class="small">工作台免费；测试可能产生少量模型用量。支持兼容接口，不代表所有服务均可用。</p>';host.querySelector('#flow-connect').onclick=()=>window.workbenchAI.open();host.querySelector('#flow-start').onclick=()=>{if(window.workbenchAI.isReady()){stage='questions';mount()}};return}
+host.innerHTML='<p>连接已通过 · 回答保存在当前浏览器，最后统一提交分析。</p>';
+if(stage==='questions'){guide.hidden=false;const next=guide.querySelector('#guide-next'),other=guide.querySelector('#guide-answer');const valid=()=>guide.querySelectorAll('[name="choice"]:checked').length>0&&(![...guide.querySelectorAll('[name="choice"]:checked')].some(x=>x.value==='其他')||other.value.trim());next.disabled=!valid();next.textContent='保存并继续';if(!next.dataset.wired){const original=next.onclick;next.dataset.wired='1';next.onclick=()=>{if(!valid())return;const last=guide.querySelector('p').textContent.includes('5 / 5');if(last){stage='intro';introPage=0}else original();mount()};guide.addEventListener('change',()=>{next.disabled=!valid()});other.addEventListener('input',()=>{next.disabled=!valid()})}return}
+if(stage==='intro'){bio.hidden=false;for(let i=0;i<4;i++){const t=bio.querySelector('#intro-'+i),h=bio.querySelector('#intro-help-'+i),l=bio.querySelector('label[for="intro-'+i+'"]'),skip=bio.querySelector('#intro-skip-'+i).parentElement;[t,h,l,skip].forEach(x=>x.hidden=i!==introPage)}
+host.innerHTML+=`<h3>自我介绍 ${introPage+1} / 4</h3>`;let nav=bio.querySelector('#intro-nav');if(!nav){nav=document.createElement('div');nav.id='intro-nav';bio.append(nav)}nav.innerHTML='<button id="intro-back">上一页</button><button id="intro-next" class="primary">保存并继续</button>';const t=bio.querySelector('#intro-'+introPage),skip=bio.querySelector('#intro-skip-'+introPage),n=nav.querySelector('#intro-next');const valid=()=>skip.checked||t.value.trim();n.disabled=!valid();t.addEventListener('input',()=>n.disabled=!valid(),{once:true});skip.addEventListener('change',()=>mount(),{once:true});nav.querySelector('#intro-back').onclick=()=>{if(introPage>0)introPage--;else stage='questions';mount()};n.onclick=()=>{if(!valid())return;if(introPage<3)introPage++;else stage='review';mount()};return}
+const data=window.personaStructuredInput();host.innerHTML+='<h3>最后核对，再提交分析</h3>'+[...data.choices.map(x=>[x.question,x.answer+(x.other?'；'+x.other:'')]),...data.introduction.map(x=>[x.section,x.answer])].map(([q,a])=>`<h4>${esc(q)}</h4><p>${esc(a)}</p>`).join('')+'<button id="review-back">返回修改</button>';host.querySelector('#review-back').onclick=()=>{stage='intro';introPage=3;mount()};service.hidden=false;const run=service.querySelector('#ai-run');if(run&&!run.disabled)run.textContent='提交给 AI 分析';
+}
+const previous=render;render=function(){previous();mount()};window.addEventListener('ai-state-change',mount);mount();
+})();
