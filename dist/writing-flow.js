@@ -1,0 +1,24 @@
+(()=>{
+const KEY='writing-demo-work-v1',ARCHIVE='writing-demo-results-v1';
+const original='新本子买回来一个星期，我一页也没写。挑颜色、挑纸张，倒花了一个晚上。\n我总觉得，要等一个完整的下午。\n后来等咖啡的时候，我在旧收据背面写了三句话。\n所以做事一定要立刻行动，永远不要拖延。';
+const revised=original.replace('所以做事一定要立刻行动，永远不要拖延。','那天回家，我把收据夹进新本子。第一页，总算有东西了。');
+const outline='开头：新本子一页没写的反差。\n经过：一直等完整的下午。\n转折：等咖啡时，在收据上写下三句话。\n结尾：回到一个具体动作，不扩大成普遍教训。';
+function read(k,f){try{return JSON.parse(localStorage.getItem(k))||f}catch{return f}}
+let d=read(KEY,{mode:'',stage:0,outline,text:'',original:'',accepted:false}),message='';
+const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function keep(){try{localStorage.setItem(KEY,JSON.stringify(d));return true}catch{message='本地保存失败，请先导出。';return false}}
+function bind(id,fn){document.getElementById(id)?.addEventListener('click',fn)}
+function snapshot(){return {id:Date.now(),time:new Date().toISOString(),kind:'demo',position:read('persona-demo-confirmed-v1',null),topic:read('topic-demo-confirmed-v1',null),work:{...d}}}
+function output(r){download('文案结果_演示_'+r.id+'.md','# 文案结果（演示，非AI分析）\n\n'+r.time+'\n\n## 定位和选题\n'+JSON.stringify({position:r.position,topic:r.topic},null,2)+'\n\n## 结构\n'+r.work.outline+'\n\n## 保留的原稿\n'+r.work.original+'\n\n## 当前稿件\n'+r.work.text+'\n\n## 修改记录\n'+(r.work.mode==='new'?'预写建议：结尾回到动作，不从单一经历推出普遍教训。采用演示修改：'+!!r.work.edited:'原稿未被自动分析或改写；只展示独立审稿样例。'))}
+function mount(){if(page!=='writing')return;const records=read(ARCHIVE,[]);app.innerHTML='<section class="panel"><div class="eyebrow">文案 · 流程演示 / 不接 API</div><h1>写完这一篇，保存结果</h1><p>演示稿是独立虚构案例，不是根据你的材料生成。原有稿件不会被覆盖。</p><div class="actions"><button id="wf-new">帮我一起写（演示）</button><button id="wf-existing">我已有稿，帮我看看</button><button id="wf-list">已保存结果（'+records.length+'）</button></div><div id="wf-body"></div><p role="status">'+e(message)+'</p></section>';
+function start(mode){if(d.mode&&d.mode!==mode&&!confirm('切换会替换当前演示编辑区，请先保存需要保留的内容。旧版稿件不受影响。继续吗？'))return;if(d.mode!==mode)d={mode,stage:0,outline:mode==='new'?outline:'',text:mode==='new'?original:(state.draft||''),original:mode==='new'?original:'',accepted:false};else d.stage=0;keep();mount()}
+bind('wf-new',()=>start('new'));bind('wf-existing',()=>start('existing'));bind('wf-list',()=>{d.stage=9;keep();mount()});const box=document.getElementById('wf-body');
+if(d.stage===9){box.innerHTML='<h2>已保存结果</h2><p>保存在此浏览器，不跨设备同步，建议导出备份。</p>'+records.map((r,i)=>'<div class="row">'+e(r.time)+' · 演示 <button id="open-'+i+'">重新打开</button><button id="export-'+i+'">导出</button></div>').join('');records.forEach((r,i)=>{bind('open-'+i,()=>{d={...r.work,stage:1};keep();mount()});bind('export-'+i,()=>output(r))});return}
+if(!d.mode){box.innerHTML='<p>从零写稿，或直接粘贴已有稿件；已有稿无需重填定位和选题。</p>';return}
+if(d.stage===0){box.innerHTML='<h2>'+(d.mode==='new'?'确认演示结构：开始记录生活':'直接粘贴已有稿件')+'</h2><textarea id="wf-input" aria-label="'+(d.mode==='new'?'结构':'原稿')+'">'+e(d.mode==='new'?d.outline:d.text)+'</textarea>'+(d.mode==='new'?'<label><input type="checkbox" id="wf-accept" '+(d.accepted?'checked':'')+'>确认结构</label>':'<p>这里只测试审稿入口，不会伪造对你原稿的分析。</p>')+'<button id="wf-next" class="primary">'+(d.mode==='new'?'进入稿件':'保留原稿，查看审稿演示')+'</button>';
+const check=()=>{document.getElementById('wf-next').disabled=d.mode==='new'?(!d.accepted||!d.outline.trim()):!d.text.trim()};check();document.getElementById('wf-input').oninput=x=>{if(d.mode==='new'){d.outline=x.target.value;d.accepted=false;document.getElementById('wf-accept').checked=false}else d.text=x.target.value;keep();check()};document.getElementById('wf-accept')?.addEventListener('change',x=>{d.accepted=x.target.checked;keep();check()});bind('wf-next',()=>{if(d.mode==='existing')d.original=d.text;d.stage=1;keep();mount()});return}
+box.innerHTML='<h2>'+(d.mode==='new'?'稿件与建议（虚构演示）':'原稿与审稿入口演示')+'</h2><details><summary>保留的原稿</summary><pre style="white-space:pre-wrap">'+e(d.original)+'</pre></details><label for="wf-text">当前稿件（可自行编辑）</label><textarea id="wf-text">'+e(d.text)+'</textarea><h3>预写审稿样例'+(d.mode==='existing'?'（与你的原稿无关）':'')+'</h3><p>值得保留：等咖啡时在收据上写字，动作具体。建议调整：“永远不要拖延”从一件小事推成普遍教训；示范结尾改为把收据夹进新本子。新增动作属于虚构案例，不是用户经历。</p>'+(d.mode==='new'?'<button id="wf-revise">采用演示修改</button>':'<p>这条样例不会应用到你的原稿。真实审稿尚未接入。</p>')+'<div class="actions"><button id="wf-back">返回调整</button><button id="wf-save" class="primary">确认并保存结果</button><button id="wf-export">导出当前结果</button></div>';
+document.getElementById('wf-text').oninput=x=>{d.text=x.target.value;keep()};bind('wf-back',()=>{d.stage=0;keep();mount()});bind('wf-revise',()=>{if(d.text!==original&&!confirm('替换编辑区为演示修改稿？原稿保留；手动修改请先导出。'))return;d.text=revised;d.edited=true;keep();mount()});bind('wf-export',()=>output(snapshot()));bind('wf-save',()=>{try{records.unshift(snapshot());localStorage.setItem(ARCHIVE,JSON.stringify(records));message='已保存，可重新打开和导出。本轮到这里结束。';mount()}catch{message='保存失败，请导出备份。';mount()}});
+}
+const previous=render;render=function(){previous();mount()};mount();
+})();
