@@ -4,10 +4,10 @@ const css=document.createElement('link');css.rel='stylesheet';css.href='star-map
 try{if(localStorage.getItem('workbench-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}
 const groups=[
  {p:'position',title:'第一部分　定位',color:'#c86955',items:[['人设定位','persona-module'],['商业定位','offering'],['内容定位','contentAudience']]},
- {p:'topic',title:'第二部分　选题',color:'#75a17e',items:[['给谁看','audience'],['为什么值得看','topic'],['真实材料与表达','material']]},
- {p:'writing',title:'第三部分　文案',color:'#5999c7',items:[['素材挖掘','material',0],['结构方案','outline',1],['口播与配音 Vlog','form',0],['改稿与复查','notes',3]]},
+ {p:'topic',title:'第二部分　选题',color:'#75a17e',items:[['帮我找选题','topic-flow'],['已有选题，帮我判断','topic-existing']]},
+ {p:'writing',title:'第三部分　文案',color:'#5999c7',items:[['帮我一起写','wf-new'],['我已有稿，帮我审改','wf-existing'],['我的已保存结果','wf-list']]},
  {p:'shoot',title:'第四部分　准备拍摄',color:'#d7ae57',items:[['Vlog 分镜表','',null,'配音 Vlog'],['口播拍摄清单','',null,'口播']]},
- {p:'review',title:'第五部分　看成片',color:'#a87db7',items:[['内容与结构','reviewNotes'],['段落取舍','passage'],['修改复验','filmCheck']]}
+ {p:'review',title:'第五部分　看成片',color:'#a87db7',items:[['给成片修改意见','reviewNotes'],['修改后复查','filmCheck']]}
 ];
 let search='';
 const aside=document.querySelector('aside');
@@ -21,7 +21,7 @@ aside.querySelector('#theme-toggle').onclick=()=>{const t=document.documentEleme
 function filter(){let count=0;aside.querySelectorAll('.catalog-group').forEach(g=>{const all=g.querySelector('.catalog-heading').textContent.includes(search);let visible=0;g.querySelectorAll('.catalog-sub').forEach(b=>{b.hidden=!(all||b.textContent.toLowerCase().includes(search));if(!b.hidden)visible++});g.hidden=!visible;count+=visible});aside.querySelector('.catalog-empty').hidden=count>0}
 aside.querySelector('#catalog-search').oninput=e=>{search=e.target.value.trim().toLowerCase();filter()};
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.body.classList.add('menu-open');document.querySelector('.menu-toggle').setAttribute('aria-expanded','true');aside.querySelector('#catalog-search').focus()}if(e.key==='Escape')close()});
-function go(p,target='',s=null,f=null){page=p;if(s!==null)step=Number(s);if(f){state.form=f;save()}render();close();window.scrollTo(0,0);if(target){let el=document.getElementById(target);if(target==='passage')el=[...app.querySelectorAll('h2,h3')].find(x=>x.textContent.includes('段落怎么取舍'));if(target==='filmCheck')el=app.querySelector('[data-table="filmCheck"]');if(el){for(let parent=el.parentElement;parent;parent=parent.parentElement){if(parent.tagName==='DETAILS')parent.open=true}el.scrollIntoView({block:'center'});if(/INPUT|TEXTAREA|SELECT/.test(el.tagName))el.focus({preventScroll:true})}}}
+function go(p,target='',s=null,f=null){page=p;if(s!==null)step=Number(s);if(f){state.form=f;save()}render();close();window.scrollTo(0,0);if(['wf-new','wf-existing','wf-list'].includes(target)){document.getElementById(target)?.click();return}if(target==='topic-existing'){app.innerHTML='<section class="panel"><div class="eyebrow">选题 / 直接审题入口</div><h1>已有选题，帮我判断</h1><p>不必先填人设。这里只收集现有选题，本轮先确认目录和入口，自动判断尚未接入。</p><label for="existing-topic-input">你的选题和已有材料</label><textarea id="existing-topic-input"></textarea><p>后续意见应说明：哪里值得讲、依据是什么、缺什么材料、建议如何调整。不让你自己填写判断。</p><p id="existing-topic-status" role="status"></p></section>';const t=document.getElementById('existing-topic-input');try{t.value=localStorage.getItem('existing-topic-input-v1')||''}catch{}t.oninput=()=>{try{localStorage.setItem('existing-topic-input-v1',t.value);document.getElementById('existing-topic-status').textContent='材料已保存在当前浏览器，尚未分析。'}catch{document.getElementById('existing-topic-status').textContent='保存失败，请先自行保留文字。'}};return}if(target){let el=document.getElementById(target);if(target==='passage')el=[...app.querySelectorAll('h2,h3')].find(x=>x.textContent.includes('段落怎么取舍'));if(target==='filmCheck')el=app.querySelector('[data-table="filmCheck"]');if(el){for(let parent=el.parentElement;parent;parent=parent.parentElement){if(parent.tagName==='DETAILS')parent.open=true}el.scrollIntoView({block:'center'});if(/INPUT|TEXTAREA|SELECT/.test(el.tagName))el.focus({preventScroll:true})}}}
 // Deliberately irregular constellation: small topic nodes, no central hub.
 const nodes=[
  ['定位',215,145,0,18,''],['社会身份',120,85,0,9,'socialIdentity'],['商业身份',95,180,0,9,'businessIdentity'],['内容定位',175,250,0,10,'contentAudience'],
