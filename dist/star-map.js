@@ -47,16 +47,12 @@ function map(){
 }
 let motionCleanup=()=>{};
 function setupMotion(){
- const svg=app.querySelector('.galaxy-svg'),panel=app.querySelector('.galaxy-panel'),btn=app.querySelector('#galaxy-motion-toggle');
- if(!svg||!btn)return;
- const reduce=window.matchMedia('(prefers-reduced-motion: reduce)');
- let paused=reduce.matches;
- function update(){const stopped=paused||document.hidden;panel.classList.toggle('motion-paused',stopped);stopped?svg.pauseAnimations():svg.unpauseAnimations();btn.textContent=paused?'播放动效':'暂停动效';btn.setAttribute('aria-pressed',String(paused))}
- btn.onclick=()=>{paused=!paused;update()};
- const preference=()=>{paused=reduce.matches;update()};
- reduce.addEventListener('change',preference);document.addEventListener('visibilitychange',update);
- motionCleanup=()=>{reduce.removeEventListener('change',preference);document.removeEventListener('visibilitychange',update)};
- update();
+ const host=app.querySelector('.star-scroll'),btn=app.querySelector('#galaxy-motion-toggle');
+ if(!host||!btn||!window.mountGalaxy3D)return;
+ host.innerHTML='<div class="galaxy-3d" aria-label="三维知识星图"></div>';
+ motionCleanup=window.mountGalaxy3D(host.firstElementChild,nodes,groups,btn);
+ app.querySelector('.star-heading span').firstChild.textContent='三维星团 · 拖动旋转 ';
+ app.querySelector('.map-note').textContent='拖动星空旋转视角，点击星团进入工具。轨道仅作视觉导航，不代表课程因果关系；也可直接使用左侧目录或下方入口。';
 }
 function home(){app.innerHTML=`<section class="map-hero"><div class="eyebrow">从定位到成片 / 一条清楚的创作路径</div><h1>创作知识库 <span class="galaxy-word">galaxy</span></h1><p>从定位、选题到写稿、拍摄与审片。<br>沿着目录查方法，也可以从当前任务直接开始。</p></section><section class="star-panel galaxy-panel"><div class="star-heading"><h2>知识地图</h2><span>五个主题星团 · 点击进入 <button id="galaxy-motion-toggle" type="button" aria-pressed="false">暂停动效</button></span></div><div class="star-scroll">${map()}</div><div class="star-legend">${groups.map(g=>`<button data-route="${g.p}"><i style="background:${g.color}"></i>${names[g.p]}</button>`).join('')}</div><p class="map-note">星团对应五个任务入口，轨道与微光仅作视觉导航，不代表课程因果关系。手机可横向滑动，也可使用下方快捷入口。</p></section><section class="map-bottom" id="start-guide"><div><h3>从你已有的材料开始</h3><p>有介绍，去定位；有想法，去选题；有稿件，去文案；有视频，去看成片。</p></div><button class="primary" data-route="position" data-target="persona-module">试用人设定位 →</button></section><details class="source"><summary>这版能做什么？</summary><p>填写与保存材料、查看方法提示与预写示例、导出记录、本地播放视频。AI自动诊断、自动写稿及实时知识库检索尚未接入。知识地图是工具导航，不是课程全文。</p></details>`;setupMotion();app.querySelectorAll('[data-node]').forEach(el=>{const index=Number(el.dataset.node),n=nodes[index];const select=()=>go(groups[n[3]].p,n[5],n[6]??null,n[7]||null);el.onclick=select;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select()}};const highlight=on=>app.querySelectorAll('.star-edge').forEach(l=>l.classList.toggle('on',on&&(Number(l.dataset.a)===index||Number(l.dataset.b)===index)));el.onmouseenter=()=>highlight(true);el.onmouseleave=()=>highlight(false);el.onfocus=()=>highlight(true);el.onblur=()=>highlight(false)})}
 const previous=render;render=function(){motionCleanup();previous();if(page==='home')home();document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>go(b.dataset.route,b.dataset.target||'',b.dataset.step??null,b.dataset.form||null));aside.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>go(b.dataset.page));filter()};render();
