@@ -26,7 +26,7 @@ window.mountGalaxy3D=function(host,nodes,groups,toggle){
   for(let k=0;k<4;k++){const q=project(orbit(phase*(.28+k*.05)+k*1.7,k));objects.push({z:q.z,draw:()=>{glow(q.x,q.y,12*q.s,'#a9c7ff',.9);ctx.fillStyle='#f2f1ff';ctx.beginPath();ctx.arc(q.x,q.y,2.4*q.s,0,Math.PI*2);ctx.fill()}})}
   objects.push({z:0,draw:()=>{const r=33*center.s;glow(center.x,center.y,r*2.5,'#aa71ef',.6);const g=ctx.createRadialGradient(center.x-r*.35,center.y-r*.42,1,center.x,center.y,r);g.addColorStop(0,'#fff8ff');g.addColorStop(.32,'#e6caff');g.addColorStop(.72,'#9375d1');g.addColorStop(1,'#362951');ctx.fillStyle=g;ctx.beginPath();ctx.arc(center.x,center.y,r,0,Math.PI*2);ctx.fill()}});
   objects.sort((a,b)=>b.z-a.z).forEach(o=>o.draw());
-  ctx.textAlign='center';ctx.fillStyle='#eee5ff';ctx.font='600 '+Math.max(16,22*center.s)+'px sans-serif';ctx.fillText('创作知识库',center.x,center.y+57*center.s);ctx.fillStyle='#a49abb';ctx.font='10px sans-serif';ctx.fillText('CONTENT GALAXY',center.x,center.y+76*center.s);
+  ctx.textAlign='center';ctx.fillStyle='#eee5ff';ctx.font='600 '+Math.max(16,22*center.s)+'px "Workbench Source Han Sans", sans-serif';ctx.fillText('创作知识库',center.x,center.y+57*center.s);ctx.fillStyle='#a49abb';ctx.font='10px "Workbench Source Han Sans", sans-serif';ctx.fillText('CONTENT GALAXY',center.x,center.y+76*center.s);
   points.forEach((p,i)=>{const q=project(p),b=buttons[i];b.style.left=q.x+'px';b.style.top=(q.y+9*q.s)+'px';b.style.transform='translateX(-50%) scale('+Math.max(.8,Math.min(1.2,q.scale))+')';b.style.opacity=String(Math.max(.5,Math.min(1,q.scale*.85)));b.style.zIndex=String(Math.round(1000-q.z));b.dataset.depth=q.z.toFixed(2)});
   host.dataset.yaw=yaw.toFixed(4);
  }
@@ -39,5 +39,6 @@ window.mountGalaxy3D=function(host,nodes,groups,toggle){
  canvas.onpointerup=canvas.onpointercancel=()=>{drag=null;canvas.style.cursor='grab'};
  buttons.forEach(b=>{b.addEventListener('pointerenter',()=>hover=true);b.addEventListener('pointerleave',()=>hover=false);b.addEventListener('focus',()=>focused=true);b.addEventListener('blur',()=>focused=false)});
  const observer=new ResizeObserver(resize);observer.observe(host);resize();frame=requestAnimationFrame(tick);
+ document.fonts.ready.then(()=>{if(alive)draw()});
  return()=>{alive=false;cancelAnimationFrame(frame);observer.disconnect();reduced.removeEventListener('change',preference);toggle.onclick=null};
 };
