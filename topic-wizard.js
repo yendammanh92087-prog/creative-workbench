@@ -114,11 +114,11 @@
     if (page !== "topic") return;
     const p = position();
     app.innerHTML =
-      '<section class="panel" id="topic-flow"><div class="eyebrow">02 / 选题</div><h1>把想法变成一个选题</h1><div class="actions" role="group" aria-label="选题方式"><button id="tw-find" aria-pressed="' +
+      '<section class="panel" id="topic-flow"><div class="eyebrow">02 / 选题</div><h1>把想法变成一个选题</h1><div class="wf-tabs" role="tablist" aria-label="选题方式"><button id="tw-find" role="tab" class="wf-tab' + (mode === "find" ? " on" : "") + '" aria-selected="' +
       (mode === "find") +
-      '">帮我找选题</button><button id="tw-existing" aria-pressed="' +
+      '">帮我找选题</button><button id="tw-existing" role="tab" class="wf-tab' + (mode === "existing" ? " on" : "") + '" aria-selected="' +
       (mode === "existing") +
-      '">已有选题，帮我判断</button></div><details><summary>已带入的定位</summary><pre style="white-space:pre-wrap">' +
+      '">已有选题，帮我判断</button></div><details class="tw-pos"><summary>已带入的定位</summary><pre style="white-space:pre-wrap">' +
       e(
         p?.summary ||
           "尚未确认定位。也可以先找选题；想让 AI 结合定位判断，先去「01 定位」。",
