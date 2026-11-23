@@ -353,8 +353,8 @@
         return;
       }
       const dk = opts.docKey ? String(opts.docKey()) : card.docKey;
-      const sameDoc =
-        card.docKey === undefined || card.docKey === dk;
+      const docText = opts.docText ? String(opts.docText()) : payload;
+      const sameDoc = isSameDoc(card, dk, docText);
       const messages = [{ role: "system", content: opts.system }];
       if (card.result && card.lastPayload && sameDoc)
         messages.push(
@@ -377,6 +377,7 @@
         card.result = next;
         card.lastPayload = payload;
         card.docKey = dk;
+        card.lastDoc = docText;
         card.resultModel = config.model;
         card.msg = "建议已返回。先看优先修改项，再决定是否采用。";
         opts.onResult?.(next, ctl);
@@ -394,8 +395,9 @@
       const o = card.opts,
         canRun = !busy;
       const dkNow = o.docKey ? String(o.docKey()) : card.docKey;
-      const stale =
-        card.result && card.docKey !== undefined && dkNow !== card.docKey;
+      let now = "";
+      try { now = (o.docText ? o.docText() : o.payload?.()) || ""; } catch {}
+      const stale = !!card.result && !isSameDoc(card, dkNow, now);
       h.innerHTML = `<div class="ai-actions"><button class="primary" data-ai="run" ${canRun ? "" : "disabled"}>${busy ? "正在处理…" : ready ? (stale ? o.runLabel || "帮我看看" : card.result ? "看看这次改得怎样" : o.runLabel || "帮我看看") : "先连接我的 AI"}</button><button data-ai="open">AI 设置</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}</div><p class="small">${esc(o.intro || "")}</p><p class="small">${ready ? "将发送到 " + esc(config.base) + " · " + esc(config.model) : "首次配置后本页即可使用；不连接时仍可按页面提示整理材料。刷新后需重填密钥。"}</p><p role="status">${esc(card.msg)}</p>${!storageOK ? "<p>配置未能保存在浏览器，下次需重新填写。</p>" : ""}${card.result ? `<section class="ai-result"><h3>${esc(o.resultTitle || "AI 建议")}</h3><p class="small">AI 建议，最终由你决定 · 模型：${esc(card.resultModel)}</p>${stale ? '<p class="notice">当前材料和上次分析的不是同一份。以下是上一份的建议，点击按钮获得针对当前材料的分析。</p>' : ""}<pre>${esc(card.result)}</pre><div class="actions">${o.exportName ? '<button data-ai="export">导出这份建议</button>' : ""}<button data-ai="new" ${busy ? "disabled" : ""}>清除 AI 上下文，重新分析</button></div><p class="small">结果只在当前页面保留，刷新前请导出。修改材料后可再次点击复查。</p></section>` : ""}`;
       h.querySelector('[data-ai="run"]').onclick = run;
       h.querySelector('[data-ai="open"]').onclick = open;
@@ -438,6 +440,25 @@
     return ctl;
   }
 
+  /* 材料相似度：字符二元组重合率，低于阈值视为换了一份新材料 */
+  function similarity(a, b) {
+    const grams = (t) => {
+      const g = new Set();
+      t = String(t).replace(/\s+/g, "");
+      for (let i = 0; i < t.length - 1; i++) g.add(t.slice(i, i + 2));
+      return g;
+    };
+    const A = grams(a), B = grams(b);
+    if (!A.size || !B.size) return 0;
+    let n = 0;
+    for (const x of A) if (B.has(x)) n++;
+    return n / Math.min(A.size, B.size);
+  }
+  function isSameDoc(card, dk, payload) {
+    if (!card.result || !card.lastPayload) return false;
+    if (card.docKey !== undefined && card.docKey !== dk) return false;
+    return similarity(card.lastDoc ?? card.lastPayload, payload) >= 0.5;
+  }
   window.workbenchAI = {
     isReady: () => ready,
     busy: () => busy,

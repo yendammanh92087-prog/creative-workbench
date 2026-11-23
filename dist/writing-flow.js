@@ -331,12 +331,14 @@
       state.draft = textEl.value;
       save();
       keep();
+      clearTimeout(textEl._t);
+      textEl._t = setTimeout(() => reviewAdv?.paint(), 400);
     };
     if (d.text && !state.draft) {
       state.draft = d.text;
       save();
     }
-    window.workbenchAI.advisor(box.querySelector("#wf-review-adv"), {
+    const reviewAdv = window.workbenchAI.advisor(box.querySelector("#wf-review-adv"), {
       id: "wf-review-" + d.mode,
       intro:
         "发送当前稿件" +
@@ -345,6 +347,7 @@
       runLabel: "审我的稿",
       system: REVIEW_SYSTEM,
       docKey: () => (d.mode === "new" ? d.outline : d.original),
+      docText: () => d.text,
       payload: () =>
         (d.mode === "new" && d.outline
           ? "【已确认的结构】\n" + d.outline + "\n\n"
