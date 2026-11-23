@@ -3,7 +3,7 @@ let stage='questions',introPage=0,preview=true,restored=false;
 const css=document.createElement('style');css.textContent='#persona-body [hidden],#app > [hidden]{display:none!important}';document.head.append(css);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function mount(){
-document.getElementById('global-ai-settings')?.setAttribute('hidden','');
+// Keep the optional global connection entry visible; never gate the wizard on it.
 const badge=document.querySelector('.badge');if(badge)badge.textContent='流程测试 · 无需 API';
 if(page==='topic'&&!document.getElementById('demo-position-context')){let accepted;try{accepted=JSON.parse(localStorage.getItem('persona-demo-confirmed-v1'))}catch{}if(accepted){const panel=document.createElement('section');panel.id='demo-position-context';panel.className='panel';panel.innerHTML='<h3>已带入定位 · 演示测试</h3><p>这是测试定位，不是真实 AI 结论。下面可以继续测试选题，不用重填定位。</p><pre style="white-space:pre-wrap"></pre>';panel.querySelector('pre').textContent=accepted.summary;app.prepend(panel);}}
 const body=document.getElementById('persona-body');if(!body||!document.getElementById('persona-guide'))return;

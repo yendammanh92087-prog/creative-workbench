@@ -31,7 +31,7 @@ const advanced=document.createElement('details');advanced.innerHTML='<summary>�
 const note=document.createElement('p');note.className='small';note.textContent='DeepSeek：已按官方文档预填地址和 deepseek-flash 模型。只需填入自己的密钥并确认测试；实际可用性以连接测试为准。';preset.after(note);
 const originalPreset=preset.onchange;preset.onchange=e=>{if(e.target.value!=='deepseek'){originalPreset(e);advanced.open=true;return}dialog.querySelector('#ai-base').value='https://api.deepseek.com';dialog.querySelector('#ai-model').value='deepseek-flash';dialog.querySelector('#ai-key').value='';key='';advanced.open=false;invalidate()};
 dialog.addEventListener('toggle',()=>{if(!dialog.open)return;const base=dialog.querySelector('#ai-base').value;if(!base){preset.value='deepseek';preset.onchange({target:preset})}else if(base==='https://api.deepseek.com'){preset.value='deepseek';advanced.open=false}else advanced.open=true});
-const button=document.createElement('button');button.id='global-ai-settings';button.textContent='AI 设置';button.onclick=open;document.querySelector('.aside-bottom')?.prepend(button);
+const button=document.createElement('button');button.id='global-ai-settings';button.textContent='AI 设置';button.onclick=open;button.style.cssText='white-space:nowrap;flex-shrink:0;padding:7px 12px;font-size:13px';document.querySelector('.topbar')?.append(button);
 // Retire an unfinished old OAuth return. Never exchange codes automatically.
 try{if(sessionStorage.getItem('workbench-oauth-pending')){sessionStorage.removeItem('workbench-oauth-pending');const u=new URL(location.href);u.searchParams.delete('code');u.searchParams.delete('state');history.replaceState(null,'',u)}}catch{}
 function simplify(){
