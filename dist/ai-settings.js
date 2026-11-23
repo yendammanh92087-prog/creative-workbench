@@ -321,7 +321,8 @@
    *   runLabel:     首次按钮文字（默认「帮我看看」）
    *   system:       系统提示词
    *   payload:      () => string   返回本次要发送的用户消息；空串视为材料不足
-   *   emptyMessage: 材料不足时的提示
+   *   docKey:       () => string   可选：当前材料/文稿的标识。标识变化时视为新材料，
+   *                                不复查旧上下文，旧建议标注「上一份材料」。
    *   maxTokens:    默认 2000
    *   resultTitle:  结果标题
    *   exportName:   导出文件名（可选，给了才有导出按钮）
@@ -351,8 +352,11 @@
         paint();
         return;
       }
+      const dk = opts.docKey ? String(opts.docKey()) : card.docKey;
+      const sameDoc =
+        card.docKey === undefined || card.docKey === dk;
       const messages = [{ role: "system", content: opts.system }];
-      if (card.result && card.lastPayload)
+      if (card.result && card.lastPayload && sameDoc)
         messages.push(
           { role: "user", content: card.lastPayload },
           { role: "assistant", content: card.result },
@@ -360,8 +364,9 @@
       messages.push({
         role: "user",
         content:
-          (card.result ? "这是更新后的材料，请对照上次建议复查：\n" : "") +
-          payload,
+          (card.result && sameDoc
+            ? "这是更新后的材料，请对照上次建议复查：\n"
+            : "") + payload,
       });
       busy = true;
       card.msg = "正在分析你的材料…";
@@ -371,6 +376,7 @@
         const next = await request(messages, opts.maxTokens || 2000);
         card.result = next;
         card.lastPayload = payload;
+        card.docKey = dk;
         card.resultModel = config.model;
         card.msg = "建议已返回。先看优先修改项，再决定是否采用。";
         opts.onResult?.(next, ctl);
@@ -387,7 +393,10 @@
       if (!h || !h.isConnected) return;
       const o = card.opts,
         canRun = !busy;
-      h.innerHTML = `<div class="ai-actions"><button class="primary" data-ai="run" ${canRun ? "" : "disabled"}>${busy ? "正在处理…" : ready ? (card.result ? "看看这次改得怎样" : o.runLabel || "帮我看看") : "先连接我的 AI"}</button><button data-ai="open">AI 设置</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}</div><p class="small">${esc(o.intro || "")}</p><p class="small">${ready ? "将发送到 " + esc(config.base) + " · " + esc(config.model) : "首次配置后本页即可使用；不连接时仍可按页面提示整理材料。刷新后需重填密钥。"}</p><p role="status">${esc(card.msg)}</p>${!storageOK ? "<p>配置未能保存在浏览器，下次需重新填写。</p>" : ""}${card.result ? `<section class="ai-result"><h3>${esc(o.resultTitle || "AI 建议")}</h3><p class="small">AI 建议，最终由你决定 · 模型：${esc(card.resultModel)}</p><pre>${esc(card.result)}</pre><div class="actions">${o.exportName ? '<button data-ai="export">导出这份建议</button>' : ""}<button data-ai="new" ${busy ? "disabled" : ""}>清除 AI 上下文，重新分析</button></div><p class="small">结果只在当前页面保留，刷新前请导出。修改材料后可再次点击复查。</p></section>` : ""}`;
+      const dkNow = o.docKey ? String(o.docKey()) : card.docKey;
+      const stale =
+        card.result && card.docKey !== undefined && dkNow !== card.docKey;
+      h.innerHTML = `<div class="ai-actions"><button class="primary" data-ai="run" ${canRun ? "" : "disabled"}>${busy ? "正在处理…" : ready ? (stale ? o.runLabel || "帮我看看" : card.result ? "看看这次改得怎样" : o.runLabel || "帮我看看") : "先连接我的 AI"}</button><button data-ai="open">AI 设置</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}</div><p class="small">${esc(o.intro || "")}</p><p class="small">${ready ? "将发送到 " + esc(config.base) + " · " + esc(config.model) : "首次配置后本页即可使用；不连接时仍可按页面提示整理材料。刷新后需重填密钥。"}</p><p role="status">${esc(card.msg)}</p>${!storageOK ? "<p>配置未能保存在浏览器，下次需重新填写。</p>" : ""}${card.result ? `<section class="ai-result"><h3>${esc(o.resultTitle || "AI 建议")}</h3><p class="small">AI 建议，最终由你决定 · 模型：${esc(card.resultModel)}</p>${stale ? '<p class="notice">当前材料和上次分析的不是同一份。以下是上一份的建议，点击按钮获得针对当前材料的分析。</p>' : ""}<pre>${esc(card.result)}</pre><div class="actions">${o.exportName ? '<button data-ai="export">导出这份建议</button>' : ""}<button data-ai="new" ${busy ? "disabled" : ""}>清除 AI 上下文，重新分析</button></div><p class="small">结果只在当前页面保留，刷新前请导出。修改材料后可再次点击复查。</p></section>` : ""}`;
       h.querySelector('[data-ai="run"]').onclick = run;
       h.querySelector('[data-ai="open"]').onclick = open;
       h.querySelector('[data-ai="stop"]')?.addEventListener("click", () =>
@@ -436,6 +445,15 @@
     open,
     ask: request,
     advisor,
+    reset: (id) => {
+      const c = cards.get(id);
+      if (c) {
+        c.result = "";
+        c.lastPayload = "";
+        c.docKey = undefined;
+        c.msg = "";
+      }
+    },
   };
 
   const css = document.createElement("link");

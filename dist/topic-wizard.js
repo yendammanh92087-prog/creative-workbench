@@ -155,6 +155,7 @@
         intro: "发送这段选题材料和已确认的定位（如有）。",
         runLabel: "帮我判断这个选题",
         system: EXISTING_SYSTEM,
+        docKey: () => t.value,
         payload: () => {
           const p2 = position();
           return (
@@ -249,6 +250,7 @@
         intro: "发送四题回答和已确认的定位（如有），获得选题建议。",
         runLabel: "帮我看看这个选题",
         system: TOPIC_SYSTEM,
+        docKey: () => draft.answers.join("|") + draft.details.join("|"),
         payload: topicPayload,
         emptyMessage: "四题还没有内容，先返回填写。",
         resultTitle: "选题建议",

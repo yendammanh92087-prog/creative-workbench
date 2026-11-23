@@ -135,17 +135,21 @@
                 stage: 0,
                 material: mode === "new" ? t?.summary || "" : "",
                 outline: "",
-                text: mode === "existing" ? state.draft || "" : "",
+                text: "",
                 original: "",
                 review: "",
                 accepted: false,
               };
+        if (!cached) {
+          window.workbenchAI?.reset?.("wf-outline");
+          window.workbenchAI?.reset?.("wf-review-" + mode);
+        }
       }
       d.stage = 0;
       message =
         mode === "existing"
           ? "请在下方粘贴已有稿件，原稿会保留只读副本。"
-          : "";
+          : "已恢复此入口上次未保存的内容；不需要可点「清空重来」。";
       keep();
       mount();
       document.getElementById("wf-input")?.scrollIntoView({ block: "center" });
@@ -213,7 +217,7 @@
         e(d.outline) +
         '</textarea><label><input type="checkbox" id="wf-accept" style="width:auto" ' +
         (d.accepted ? "checked" : "") +
-        '>我确认这版结构，可以开始写稿</label><div class="actions"><button id="wf-next" class="primary" disabled>进入写稿 →</button></div>';
+        '>我确认这版结构，可以开始写稿</label><div class="actions"><button id="wf-next" class="primary" disabled>进入写稿 →</button><button id="wf-clear">清空重来</button></div>';
       const input = box.querySelector("#wf-input"),
         outlineEl = box.querySelector("#wf-outline"),
         acceptEl = box.querySelector("#wf-accept"),
@@ -248,6 +252,7 @@
           "发送上方材料与内容形式，AI 给两到三个结构方案供你选择或改写，不写完整稿。",
         runLabel: "给我几个结构方案",
         system: OUTLINE_SYSTEM,
+        docKey: () => input.value + "|" + formEl.value,
         payload: () =>
           "【内容形式】" +
           formEl.value +
@@ -264,6 +269,14 @@
         mount();
         window.scrollTo(0, 0);
       };
+      box.querySelector("#wf-clear").onclick = () => {
+        if (!confirm("清空本次的材料、结构和稿件，重新开始？")) return;
+        d = { mode: "new", stage: 0, material: "", outline: "", accepted: false, text: "", original: "", review: "" };
+        window.workbenchAI.reset("wf-outline");
+        window.workbenchAI.reset("wf-review-new");
+        keep();
+        mount();
+      };
       check();
       return;
     }
@@ -275,7 +288,7 @@
         e(d.text) +
         '</textarea><div class="actions"><button id="wf-next" class="primary" ' +
         (d.text.trim() ? "" : "disabled") +
-        '>保存原稿，去审稿</button><button id="wf-case">看看审稿意见长什么样（示例）</button></div>';
+        '>保存原稿，去审稿</button><button id="wf-case">看看审稿意见长什么样（示例）</button><button id="wf-clear">清空重填</button></div>';
       const input = box.querySelector("#wf-input");
       input.oninput = () => {
         d.text = input.value;
@@ -283,6 +296,12 @@
         box.querySelector("#wf-next").disabled = !d.text.trim();
       };
       bind("wf-case", () => window.reviewCase.mount(box));
+      box.querySelector("#wf-clear").onclick = () => {
+        d = { mode: "existing", stage: 0, material: "", outline: "", accepted: false, text: "", original: "", review: "" };
+        window.workbenchAI.reset("wf-review-existing");
+        keep();
+        mount();
+      };
       bind("wf-next", () => {
         d.original = d.text;
         d.stage = 1;
@@ -325,6 +344,7 @@
         "，AI 给逐条修改意见，不替你改稿。",
       runLabel: "审我的稿",
       system: REVIEW_SYSTEM,
+      docKey: () => (d.mode === "new" ? d.outline : d.original),
       payload: () =>
         (d.mode === "new" && d.outline
           ? "【已确认的结构】\n" + d.outline + "\n\n"
