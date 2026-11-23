@@ -1,6 +1,6 @@
 /* Actual navigation shell. Graph links express navigation, not causal claims. */
 (()=>{
-const css=document.createElement('link');css.rel='stylesheet';css.href='star-map.css';document.head.appendChild(css);
+const css=document.createElement('link');css.rel='stylesheet';css.href='star-map.css?v=202611231653';document.head.appendChild(css);
 try{if(localStorage.getItem('workbench-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}
 const groups=[
  {p:'position',title:'第一部分　定位',color:'#c86955',items:[['人设定位','persona-module'],['商业定位','offering'],['内容定位','contentAudience']]},
@@ -18,7 +18,7 @@ function close(){document.body.classList.remove('menu-open');document.querySelec
 scrim.onclick=close;aside.querySelector('.sidebar-close').onclick=close;
 document.querySelector('.menu-toggle').onclick=()=>{const open=document.body.classList.toggle('menu-open');document.querySelector('.menu-toggle').setAttribute('aria-expanded',String(open))};
 aside.querySelector('#theme-toggle').onclick=()=>{const t=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=t;try{localStorage.setItem('workbench-theme',t)}catch(e){}};
-function filter(){let count=0;aside.querySelectorAll('.catalog-group').forEach(g=>{const all=g.querySelector('.catalog-heading').textContent.includes(search);let visible=0;g.querySelectorAll('.catalog-sub').forEach(b=>{b.hidden=!(all||b.textContent.toLowerCase().includes(search));if(!b.hidden)visible++});g.hidden=!visible;count+=visible});aside.querySelector('.catalog-empty').hidden=count>0}
+function filter(){aside.querySelector('nav').classList.toggle('searching',!!search);let count=0;aside.querySelectorAll('.catalog-group').forEach(g=>{const all=g.querySelector('.catalog-heading').textContent.includes(search);let visible=0;g.querySelectorAll('.catalog-sub').forEach(b=>{b.hidden=!(all||b.textContent.toLowerCase().includes(search));if(!b.hidden)visible++});g.hidden=!visible;count+=visible});aside.querySelector('.catalog-empty').hidden=count>0}
 aside.querySelector('#catalog-search').oninput=e=>{search=e.target.value.trim().toLowerCase();filter()};
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();document.body.classList.add('menu-open');document.querySelector('.menu-toggle').setAttribute('aria-expanded','true');aside.querySelector('#catalog-search').focus()}if(e.key==='Escape')close()});
 function go(p,target='',s=null,f=null){page=p;if(s!==null)step=Number(s);if(f){state.form=f;save()}render();close();window.scrollTo(0,0);if(['wf-new','wf-existing','wf-list'].includes(target)){document.getElementById(target)?.click();return}if(target==='topic-existing'){window.topicWizard?.openExisting();return}if(target){let el=document.getElementById(target);if(target==='passage')el=[...app.querySelectorAll('h2,h3')].find(x=>x.textContent.includes('段落怎么取舍'));if(target==='filmCheck')el=app.querySelector('[data-table="filmCheck"]');if(el){for(let parent=el.parentElement;parent;parent=parent.parentElement){if(parent.tagName==='DETAILS')parent.open=true}el.scrollIntoView({block:'center'});if(/INPUT|TEXTAREA|SELECT/.test(el.tagName))el.focus({preventScroll:true})}}}

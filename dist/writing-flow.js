@@ -110,15 +110,28 @@
     localStorage.setItem(ARCHIVE, JSON.stringify(list));
   }
 
+  function tab(id, label, on) {
+    return '<button id="' + id + '" role="tab" class="wf-tab' + (on ? " on" : "") + '" aria-selected="' + on + '">' + label + "</button>";
+  }
+  function steps() {
+    if (!d.mode || d.stage === 9) return "";
+    const names = d.mode === "new" ? ["放材料、定结构", "自己写稿、AI 审", "保存结果"] : ["贴稿", "看意见、自己改", "保存结果"];
+    const cur = d.stage === 0 ? 0 : d.review ? 2 : 1;
+    return '<ol class="wf-steps">' + names.map((n, i) => '<li class="' + (i < cur ? "done" : i === cur ? "cur" : "") + '"><b>' + (i + 1) + "</b>" + n + "</li>").join("") + "</ol>";
+  }
   function mount() {
     if (page !== "writing") return;
     const records = archive();
     app.innerHTML =
-      '<section class="panel"><div class="eyebrow">03 / 文案</div><h1>写完这一篇，保存结果</h1><p>AI 给结构建议和修改意见，稿由你写。材料保存在此浏览器，点 AI 按钮才发送。</p><div class="actions"><button id="wf-new"' + (d.mode !== "existing" ? ' class="primary"' : "") + '>帮我一起写</button><button id="wf-existing"' + (d.mode === "existing" ? ' class="primary"' : "") + '>我已有稿，帮我审</button><button id="wf-list">已保存结果（' +
-      records.length +
-      '）</button></div><div id="wf-body"></div><p role="status">' +
-      e(message) +
-      "</p></section>";
+      '<section class="panel"><div class="eyebrow">03 / 文案</div><h1>写完这一篇，保存结果</h1><p>AI 给结构建议和修改意见，稿由你写。</p><div class="wf-tabs" role="tablist">' +
+      tab("wf-new", "帮我一起写", d.stage !== 9 && d.mode === "new") +
+      tab("wf-existing", "我已有稿，帮我审", d.stage !== 9 && d.mode === "existing") +
+      tab("wf-list", "已保存结果（" + records.length + "）", d.stage === 9) +
+      "</div>" +
+      steps() +
+      (message ? '<p class="wf-msg" role="status">' + e(message) + "</p>" : "") +
+      '<div id="wf-body"></div></section>';
+    message = "";
     function start(mode) {
       if (d.mode !== mode) {
         if (!keep()) {
@@ -147,9 +160,9 @@
       }
       d.stage = 0;
       message =
-        mode === "existing"
-          ? "请在下方粘贴已有稿件，原稿会保留只读副本。"
-          : "已恢复此入口上次未保存的内容；不需要可点「清空重来」。";
+        d.text || d.outline
+          ? "已恢复你上次没写完的内容；不需要可点下方「清空」。"
+          : "";
       keep();
       mount();
       document.getElementById("wf-input")?.scrollIntoView({ block: "center" });
@@ -217,7 +230,7 @@
         e(d.outline) +
         '</textarea><label><input type="checkbox" id="wf-accept" style="width:auto" ' +
         (d.accepted ? "checked" : "") +
-        '>我确认这版结构，可以开始写稿</label><div class="actions"><button id="wf-next" class="primary" disabled>进入写稿 →</button><button id="wf-clear">清空重来</button></div>';
+        '>我确认这版结构，可以开始写稿</label><div class="actions"><button id="wf-next" disabled>进入写稿 →</button><button id="wf-clear" class="link">清空重来</button></div>';
       const input = box.querySelector("#wf-input"),
         outlineEl = box.querySelector("#wf-outline"),
         acceptEl = box.querySelector("#wf-accept"),
@@ -225,6 +238,7 @@
         formEl = box.querySelector("#wf-form");
       const check = () => {
         nextEl.disabled = !d.accepted || !d.outline.trim();
+        nextEl.classList.toggle("primary", !nextEl.disabled);
       };
       input.oninput = () => {
         d.material = input.value;
@@ -288,7 +302,7 @@
         e(d.text) +
         '</textarea><div class="actions"><button id="wf-next" class="primary" ' +
         (d.text.trim() ? "" : "disabled") +
-        '>保存原稿，去审稿</button><button id="wf-case">看看审稿意见长什么样（示例）</button><button id="wf-clear">清空重填</button></div>';
+        '>保存原稿，去审稿</button><button id="wf-case" class="link">看看审稿意见长什么样（示例）</button><button id="wf-clear" class="link">清空重填</button></div>';
       const input = box.querySelector("#wf-input");
       input.oninput = () => {
         d.text = input.value;
@@ -324,7 +338,7 @@
       (d.mode === "new" ? "在这里写你的逐字稿" : "当前稿件（自行修改）") +
       '</label><textarea id="wf-text" rows="10">' +
       e(d.text) +
-      '</textarea><div id="wf-review-adv"></div><div class="actions"><button id="wf-back">返回上一步</button><button id="wf-save" class="primary">保存结果</button><button id="wf-export">导出当前结果（TXT）</button></div>';
+      '</textarea><div id="wf-review-adv"></div><div class="actions wf-foot"><button id="wf-save"' + (d.review ? ' class="primary"' : "") + '>保存结果</button><button id="wf-export">导出稿件和意见</button><button id="wf-back" class="link">← 返回上一步</button></div>';
     const textEl = box.querySelector("#wf-text");
     textEl.oninput = () => {
       d.text = textEl.value;
@@ -359,10 +373,11 @@
       emptyMessage: "先写出或粘贴稿件内容，再点审稿。",
       maxTokens: 2200,
       resultTitle: "审稿意见",
-      exportName: "审稿意见_AI建议.md",
       onResult: (text) => {
         d.review = text;
         keep();
+        document.getElementById("wf-save")?.classList.add("primary");
+        document.querySelectorAll(".wf-steps li").forEach((li, i) => (li.className = i < 2 ? "done" : "cur"));
       },
     });
     bind("wf-back", () => {

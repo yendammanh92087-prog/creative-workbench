@@ -398,9 +398,14 @@
       let now = "";
       try { now = (o.docText ? o.docText() : o.payload?.()) || ""; } catch {}
       const stale = !!card.result && !isSameDoc(card, dkNow, now);
-      h.innerHTML = `<div class="ai-actions"><button class="primary" data-ai="run" ${canRun ? "" : "disabled"}>${busy ? "正在处理…" : ready ? (stale ? o.runLabel || "帮我看看" : card.result ? "看看这次改得怎样" : o.runLabel || "帮我看看") : "先连接我的 AI"}</button><button data-ai="open">AI 设置</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}</div><p class="small">${esc(o.intro || "")}</p><p class="small">${ready ? "将发送到 " + esc(config.base) + " · " + esc(config.model) : "首次配置后本页即可使用；不连接时仍可按页面提示整理材料。刷新后需重填密钥。"}</p><p role="status">${esc(card.msg)}</p>${!storageOK ? "<p>配置未能保存在浏览器，下次需重新填写。</p>" : ""}${card.result ? `<section class="ai-result"><h3>${esc(o.resultTitle || "AI 建议")}</h3><p class="small">AI 建议，最终由你决定 · 模型：${esc(card.resultModel)}</p>${stale ? '<p class="notice">当前材料和上次分析的不是同一份。以下是上一份的建议，点击按钮获得针对当前材料的分析。</p>' : ""}<pre>${esc(card.result)}</pre><div class="actions">${o.exportName ? '<button data-ai="export">导出这份建议</button>' : ""}<button data-ai="new" ${busy ? "disabled" : ""}>清除 AI 上下文，重新分析</button></div><p class="small">结果只在当前页面保留，刷新前请导出。修改材料后可再次点击复查。</p></section>` : ""}`;
+      const label = busy ? "正在处理…" : !ready ? "先连接我的 AI" : stale || !card.result ? o.runLabel || "帮我看看" : "看看这次改得怎样";
+      const main = !card.result || stale;
+      h.innerHTML = `<div class="ai-actions"><button ${main ? 'class="primary"' : ""} data-ai="run" ${canRun ? "" : "disabled"}>${label}</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}<span class="ai-meta">${ready ? "AI：" + esc(config.model) : '还没连 AI · <a href="#" data-ai="open">去设置</a>'}</span></div>${o.intro ? `<p class="small">${esc(o.intro)}</p>` : ""}${card.msg ? `<p class="ai-msg" role="status">${esc(card.msg)}</p>` : ""}${card.result ? `<section class="ai-result"><div class="ai-result-head"><h3>${esc(o.resultTitle || "AI 建议")}</h3><span class="small">仅供参考，由你决定 · ${esc(card.resultModel)}</span></div>${stale ? '<p class="notice">你换了一份新材料。下面是上一份的建议，点上方按钮分析当前这份。</p>' : ""}<pre>${esc(card.result)}</pre><div class="ai-result-foot">${o.exportName ? '<button class="link" data-ai="export">导出建议</button>' : ""}<button class="link" data-ai="new" ${busy ? "disabled" : ""}>清除建议重来</button></div></section>` : ""}`;
       h.querySelector('[data-ai="run"]').onclick = run;
-      h.querySelector('[data-ai="open"]').onclick = open;
+      h.querySelector('[data-ai="open"]')?.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        open();
+      });
       h.querySelector('[data-ai="stop"]')?.addEventListener("click", () =>
         controller?.abort(),
       );
@@ -479,6 +484,6 @@
 
   const css = document.createElement("link");
   css.rel = "stylesheet";
-  css.href = "ai-settings.css";
+  css.href = "ai-settings.css?v=202611231653";
   document.head.appendChild(css);
 })();
