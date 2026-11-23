@@ -114,7 +114,7 @@
     if (page !== "writing") return;
     const records = archive();
     app.innerHTML =
-      '<section class="panel"><div class="eyebrow">03 / 文案</div><h1>写完这一篇，保存结果</h1><p>AI 给结构建议和修改意见，稿由你写。材料保存在此浏览器，点 AI 按钮才发送。</p><div class="actions"><button id="wf-new" class="primary">帮我一起写</button><button id="wf-existing">我已有稿，帮我审</button><button id="wf-list">已保存结果（' +
+      '<section class="panel"><div class="eyebrow">03 / 文案</div><h1>写完这一篇，保存结果</h1><p>AI 给结构建议和修改意见，稿由你写。材料保存在此浏览器，点 AI 按钮才发送。</p><div class="actions"><button id="wf-new"' + (d.mode !== "existing" ? ' class="primary"' : "") + '>帮我一起写</button><button id="wf-existing"' + (d.mode === "existing" ? ' class="primary"' : "") + '>我已有稿，帮我审</button><button id="wf-list">已保存结果（' +
       records.length +
       '）</button></div><div id="wf-body"></div><p role="status">' +
       e(message) +
