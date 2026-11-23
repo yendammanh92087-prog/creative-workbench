@@ -237,6 +237,7 @@
       runLabel: "分析我的定位材料",
       system: PERSONA_SYSTEM,
       payload: packet,
+      docKey: () => JSON.stringify(window.personaStructuredInput()),
       emptyMessage: "五问和四段介绍还没填内容，先返回填写。",
       maxTokens: 2200,
       resultTitle: "定位分析建议",

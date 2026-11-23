@@ -227,6 +227,7 @@ function mountShootAI() {
       "发送当前稿件与形式，AI 按表格列给出建议行，自动追加到上表（不覆盖已有行），你可再修改。",
     runLabel: "按稿件建议填表",
     system: SHOOT_SYSTEM(spec[k].cols),
+    docKey: () => state.form + "|" + draftText(),
     payload: () =>
       "【内容形式】" + state.form + "\n\n【稿件】\n" + draftText(),
     emptyMessage:
@@ -268,6 +269,7 @@ function mountFilmAI() {
     intro: "发送上方文稿。AI 没有看到视频画面，只按文字判断。",
     runLabel: "按文稿审片",
     system: FILM_SYSTEM,
+    docKey: () => t.value,
     payload: () => "【文稿 / 字幕】\n" + t.value,
     emptyMessage: "先粘贴文稿或字幕，再点审片。",
     maxTokens: 2400,
