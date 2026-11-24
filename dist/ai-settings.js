@@ -2,7 +2,8 @@
    对外接口：window.workbenchAI = { isReady, open, ask, advisor }
    各页面用 workbenchAI.advisor(host, opts) 挂一张统一的「AI 建议卡」。 */
 (() => {
-  const STORE = "workbench-ai-config-v1";
+  const STORE = "workbench-ai-config-v1",
+    KEYSTORE = "workbench-ai-key-v1";
   let config = { base: "", model: "" },
     key = "",
     ready = false,
@@ -14,8 +15,19 @@
     const x = JSON.parse(localStorage.getItem(STORE) || "null");
     if (typeof x?.base === "string" && typeof x?.model === "string")
       config = { base: x.base, model: x.model };
+    const k = JSON.parse(localStorage.getItem(KEYSTORE) || "null");
+    if (k?.key && k.base === config.base && config.model) {
+      key = k.key;
+      ready = true;
+    }
   } catch {
     storageOK = false;
+  }
+  function rememberKey(on) {
+    try {
+      if (on && key) localStorage.setItem(KEYSTORE, JSON.stringify({ base: config.base, key }));
+      else localStorage.removeItem(KEYSTORE);
+    } catch {}
   }
   const esc = (x) =>
     String(x ?? "").replace(
@@ -173,7 +185,7 @@
   const dialog = document.createElement("dialog");
   dialog.id = "ai-settings";
   dialog.setAttribute("aria-labelledby", "ai-title");
-  dialog.innerHTML = `<div class="ai-head"><h2 id="ai-title">连接你自己的 AI</h2><button id="ai-close" aria-label="关闭AI设置">×</button></div><p>工作台免费，模型调用费用由你的服务商收取。</p><label for="ai-preset">选择服务商</label><select id="ai-preset">${PRESETS.map((p) => `<option value="${p.id}">${p.name}</option>`).join("")}</select><p class="small" id="ai-preset-hint"></p><label for="ai-key">API Key</label><input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴服务商后台创建的密钥"><details id="ai-advanced"><summary>高级：服务地址与模型（已按所选服务商填好）</summary><label for="ai-base">API 服务地址（Base URL）</label><input id="ai-base" type="url" autocomplete="off" spellcheck="false" placeholder="https://你的服务商地址/v1"><label for="ai-model">模型 ID</label><input id="ai-model" autocomplete="off" spellcheck="false" placeholder="复制服务商提供的模型 ID 或接入点 ID"></details><p class="small">地址和模型记在本机。密钥只保留在当前页面内存，刷新后需重填；不上传任何服务器，不进入文案、导出或日志。</p><div class="ai-permission"><strong>发送给：<span id="ai-recipient"></span></strong><label class="ai-check"><input type="checkbox" id="ai-consent"><span>我确认此地址可信，同意向它发送密钥及请求，并使用自己的额度。测试只发送固定短消息，可能产生少量费用；点击各页面的 AI 按钮时才发送对应材料。</span></label></div><div class="actions"><button id="ai-test" class="primary">测试连接并使用</button><button id="ai-clear">清除连接设置</button></div><p id="ai-settings-status" role="status"></p><details><summary>哪些接口能用？</summary><p>支持 HTTPS、Bearer API Key 鉴权的 OpenAI 兼容 Chat Completions 文本接口，且服务商需允许网页跨域调用。预设里的服务商已实测允许浏览器直连；自定义接口能否使用以连接测试为准。</p><p>工作台不会绕过跨域限制，也不会把密钥转交代理。清除设置只清除本页密钥和本机配置，不撤销服务商后台的密钥。</p></details>`;
+  dialog.innerHTML = `<div class="ai-head"><h2 id="ai-title">连接你自己的 AI</h2><button id="ai-close" aria-label="关闭AI设置">×</button></div><p>工作台免费，模型调用费用由你的服务商收取。</p><label for="ai-preset">选择服务商</label><select id="ai-preset">${PRESETS.map((p) => `<option value="${p.id}">${p.name}</option>`).join("")}</select><p class="small" id="ai-preset-hint"></p><label for="ai-key">API Key</label><input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴服务商后台创建的密钥"><details id="ai-advanced"><summary>高级：服务地址与模型（已按所选服务商填好）</summary><label for="ai-base">API 服务地址（Base URL）</label><input id="ai-base" type="url" autocomplete="off" spellcheck="false" placeholder="https://你的服务商地址/v1"><label for="ai-model">模型 ID</label><input id="ai-model" autocomplete="off" spellcheck="false" placeholder="复制服务商提供的模型 ID 或接入点 ID"></details><label class="ai-check"><input type="checkbox" id="ai-remember" checked><span>在本机记住 Key，下次打开不用再填（公用电脑请取消勾选）</span></label><p class="small">Key 只存在你这台电脑的浏览器里，不上传任何服务器，不进入文案、导出或日志。</p><div class="ai-permission"><strong>发送给：<span id="ai-recipient"></span></strong><label class="ai-check"><input type="checkbox" id="ai-consent"><span>我确认此地址可信，同意向它发送密钥及请求，并使用自己的额度。测试只发送固定短消息，可能产生少量费用；点击各页面的 AI 按钮时才发送对应材料。</span></label></div><div class="actions"><button id="ai-test" class="primary">测试连接并使用</button><button id="ai-clear">清除连接设置</button></div><p id="ai-settings-status" role="status"></p><details><summary>哪些接口能用？</summary><p>支持 HTTPS、Bearer API Key 鉴权的 OpenAI 兼容 Chat Completions 文本接口，且服务商需允许网页跨域调用。预设里的服务商已实测允许浏览器直连；自定义接口能否使用以连接测试为准。</p><p>工作台不会绕过跨域限制，也不会把密钥转交代理。清除设置只清除本页密钥和本机配置，不撤销服务商后台的密钥。</p></details>`;
   document.body.appendChild(dialog);
 
   const presetSel = dialog.querySelector("#ai-preset"),
@@ -231,7 +243,7 @@
       if (!model || model.length > 200 || /[\r\n]/.test(model))
         throw Error("请填写服务商提供的模型 ID 或接入点 ID。");
       if (!secret || /[\r\n]/.test(secret))
-        throw Error("请填写有效 API Key，密钥只保留在当前页面。");
+        throw Error("请填写有效 API Key。");
       if (!dialog.querySelector("#ai-consent").checked)
         throw Error("请先确认地址可信，并同意使用自己的额度。");
       config = { base, model };
@@ -249,6 +261,7 @@
     try {
       await request([{ role: "user", content: "只回复 OK。" }], 32);
       ready = true;
+      rememberKey(dialog.querySelector("#ai-remember").checked);
       feedback("连接测试通过，关闭设置即可在各页面使用 AI。");
     } catch (e) {
       ready = false;
@@ -266,6 +279,7 @@
   dialog.querySelector("#ai-test").onclick = test;
   dialog.querySelector("#ai-clear").onclick = () => {
     key = "";
+    rememberKey(false);
     config = { base: "", model: "" };
     ready = false;
     try {
@@ -289,12 +303,15 @@
     dialog.querySelector("#" + id).addEventListener("input", () => {
       if (id === "ai-base") {
         key = "";
+        rememberKey(false);
         dialog.querySelector("#ai-key").value = "";
       }
       invalidate();
     }),
   );
   presetSel.onchange = (e) => applyPreset(e.target.value);
+  dialog.querySelector("#ai-remember").onchange = (e) =>
+    rememberKey(e.target.checked && ready);
   dialog.querySelector("#ai-consent").onchange = (e) => {
     if (!e.target.checked) {
       ready = false;
@@ -398,9 +415,10 @@
       let now = "";
       try { now = (o.docText ? o.docText() : o.payload?.()) || ""; } catch {}
       const stale = !!card.result && !isSameDoc(card, dkNow, now);
-      const label = busy ? "正在处理…" : !ready ? "先连接我的 AI" : stale || !card.result ? o.runLabel || "帮我看看" : "看看这次改得怎样";
+      const unchanged = card.result && !stale && String(now) === String(card.lastDoc ?? card.lastPayload);
+      const label = busy ? "正在处理…" : !ready ? "先连接我的 AI" : stale || !card.result ? o.runLabel || "帮我看看" : unchanged ? "重新分析一次" : "看看这次改得怎样";
       const main = !card.result || stale;
-      h.innerHTML = `<div class="ai-actions"><button ${main ? 'class="primary"' : ""} data-ai="run" ${canRun ? "" : "disabled"}>${label}</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}<span class="ai-meta">${ready ? "AI：" + esc(config.model) : '还没连 AI · <a href="#" data-ai="open">去设置</a>'}</span></div>${o.intro ? `<p class="small">${esc(o.intro)}</p>` : ""}${card.msg ? `<p class="ai-msg" role="status">${esc(card.msg)}</p>` : ""}${card.result ? `<section class="ai-result"><div class="ai-result-head"><h3>${esc(o.resultTitle || "AI 建议")}</h3><span class="small">仅供参考，由你决定 · ${esc(card.resultModel)}</span></div>${stale ? '<p class="notice">你换了一份新材料。下面是上一份的建议，点上方按钮分析当前这份。</p>' : ""}<pre>${esc(card.result)}</pre><div class="ai-result-foot">${o.exportName ? '<button class="link" data-ai="export">导出建议</button>' : ""}<button class="link" data-ai="new" ${busy ? "disabled" : ""}>清除建议重来</button></div></section>` : ""}`;
+      h.innerHTML = `<div class="ai-actions"><button ${main ? 'class="primary"' : ""} data-ai="run" ${canRun ? "" : "disabled"}>${label}</button>${busy ? '<button data-ai="stop">停止等待</button>' : ""}<span class="ai-meta">${ready ? "AI：" + esc(config.model) : '还没连 AI · <a href="#" data-ai="open">去设置</a>'}</span></div>${o.intro ? `<p class="small">${esc(o.intro)}</p>` : ""}${card.msg ? `<p class="ai-msg" role="status">${esc(card.msg)}</p>` : ""}${card.result ? `<section class="ai-result"><div class="ai-result-head"><h3>${esc(o.resultTitle || "AI 建议")}</h3><span class="small">仅供参考，由你决定 · ${esc(card.resultModel)}</span></div>${stale ? '<p class="notice">你换了一份新材料。下面是上一份的建议，点上方按钮分析当前这份。</p>' : ""}<div class="ai-md">${md(card.result)}</div><div class="ai-result-foot">${o.exportName ? '<button class="link" data-ai="export">导出建议</button>' : ""}<button class="link" data-ai="new" ${busy ? "disabled" : ""}>清除建议重来</button></div></section>` : ""}`;
       h.querySelector('[data-ai="run"]').onclick = run;
       h.querySelector('[data-ai="open"]')?.addEventListener("click", (ev) => {
         ev.preventDefault();
@@ -446,6 +464,18 @@
   }
 
   /* 材料相似度：字符二元组重合率，低于阈值视为换了一份新材料 */
+  function md(t) {
+    return esc(t)
+      .split("\n")
+      .map((l) => {
+        const h = l.match(/^#{1,4}\s+(.*)$/);
+        if (h) return "<h4>" + h[1] + "</h4>";
+        l = l.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+        if (/^\s*[-*]\s+/.test(l)) return '<p class="li">' + l.replace(/^\s*[-*]\s+/, "· ") + "</p>";
+        return l.trim() ? "<p>" + l + "</p>" : "";
+      })
+      .join("");
+  }
   function similarity(a, b) {
     const grams = (t) => {
       const g = new Set();
@@ -484,6 +514,6 @@
 
   const css = document.createElement("link");
   css.rel = "stylesheet";
-  css.href = "ai-settings.css?v=202611231653";
+  css.href = "ai-settings.css?v=202611241259";
   document.head.appendChild(css);
 })();
