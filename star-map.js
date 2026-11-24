@@ -1,6 +1,6 @@
 /* Actual navigation shell. Graph links express navigation, not causal claims. */
 (()=>{
-const css=document.createElement('link');css.rel='stylesheet';css.href='star-map.css?v=202611231653';document.head.appendChild(css);
+const css=document.createElement('link');css.rel='stylesheet';css.href='star-map.css?v=202611241259';document.head.appendChild(css);
 try{if(localStorage.getItem('workbench-theme')==='light')document.documentElement.dataset.theme='light'}catch(e){}
 const groups=[
  {p:'position',title:'第一部分　定位',color:'#c86955',items:[['人设定位','persona-module'],['商业定位','offering'],['内容定位','contentAudience']]},
